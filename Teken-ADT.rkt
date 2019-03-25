@@ -45,8 +45,8 @@
 
   ;Tekent en verwijder munt
   (define (teken-munt! munt-adt)
-    (let* ((munt-x (x-venster (munt-adt 'x)))
-           (munt-y (y-venster (munt-adt 'y))))
+    (let* ((munt-x (munt-adt 'x))
+           (munt-y (munt-adt 'y)))
       ((munt-laag 'add-drawable) munt-tile)
       ((munt-tile 'set-x!) munt-x)
       ((munt-tile 'set-y!) munt-y)))
@@ -60,26 +60,37 @@
   ((kikker-laag 'add-drawable) kikker-tile)
 
   (define auto-laag (venster 'make-layer))
-  (define auto-tile2 (make-bitmap-tile "auto1.png" "Auto1_mask.png"))
   (define auto-tile (make-bitmap-tile "auto1.png" "Auto1_mask.png"))
+  (define auto-tile2 (make-bitmap-tile "auto1.png" "Auto1_mask.png"))
+  (define auto-tile3 (make-bitmap-tile "auto2.png" "Auto2_mask.png"))
+  (define auto-tile4 (make-bitmap-tile "auto2.png" "Auto2_mask.png"))
+  
   ((auto-laag 'add-drawable) auto-tile)
   ((auto-laag 'add-drawable) auto-tile2)
+  ((auto-laag 'add-drawable) auto-tile3)
+  ((auto-laag 'add-drawable) auto-tile4)
+  
+  (define auto-tile-vector (vector auto-tile auto-tile2 auto-tile3 auto-tile4))
 
 
   ;; Teken Kikker
   (define (teken-kikker! kikker-adt)
-    (let* ((kikker-x (x-venster (kikker-adt 'x)))
-           (kikker-y (y-venster (kikker-adt 'y))))
-      
+    (let* ((kikker-x (kikker-adt 'x))
+           (kikker-y (kikker-adt 'y)))
       ((kikker-tile 'set-x!) kikker-x)
       ((kikker-tile 'set-y!) kikker-y)))
 
-  (define (teken-auto! auto-adt)
+  (define (teken-auto! auto-adt nr)
     (let* ((auto-x (auto-adt 'x))
            (auto-y (auto-adt 'y)))
+      (((vector-ref auto-tile-vector nr) 'set-x!) auto-x)
+      (((vector-ref auto-tile-vector nr) 'set-y!) auto-y)))
+
+  
+  #;(define (teken-functie! adt)
+    (let ((x-pos (adt 'x))
+          (y-pos (adt 'y))))) ;TODO: hoe vind je de tile bijhorend bij het adt??
       
-      ((auto-tile 'set-x!) auto-x)
-      ((auto-tile 'set-y!) auto-y)))
 
 
   ;; Spel lus functies

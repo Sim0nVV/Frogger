@@ -7,18 +7,18 @@
                                           kikker-y-startpos))
         (beweging 'doe-niets)) ;beweging is de richting waarin de kikker zal updaten na beweeg!
 
-    (define pixel-movement (/ 5 px-element-breedte))
+    (define px-afgelegde-afstand 10)
 
     ;berekent volgende positie aan de hand van de tag beweging
     (define (volgende-positie x y)
       (cond ((eq? 'omhoog beweging)
-             (cons x (- y 1)))
+             (cons x (- y px-element-hoogte)))
             ((eq? 'omlaag beweging)
-             (cons x (+ y 1)))
+             (cons x (+ y px-element-hoogte)))
             ((eq? 'links beweging)
-             (cons (- x pixel-movement) y))
+             (cons (- x px-afgelegde-afstand) y))
             ((eq? 'rechts beweging)
-             (cons (+ x pixel-movement) y))
+             (cons (+ x px-afgelegde-afstand) y))
             ((eq? 'doe-niets beweging)
              (cons x y))))
 

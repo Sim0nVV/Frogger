@@ -4,9 +4,9 @@
 
 ;bereken random plaats muntje
 (define (random-x)
-  (random 14))
+  (* (random 14) px-element-breedte))
 (define (random-y) ;random uit lijst pos-baan gekozen
-  (list-ref pos-baan (random 6)))
+  (* (list-ref pos-baan (random 6)) px-element-hoogte))
 
 (define (maak-adt-munt) 
   (let ((munt-positie (maak-adt-positie (random-x) (random-y)))) 

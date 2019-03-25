@@ -29,9 +29,9 @@
 
 ;Grenzen scherm (voor collision detection)
 (define bovenaan-scherm 0)
-(define onderaan-scherm 12)
+(define onderaan-scherm (* 12 px-element-hoogte))
 (define links-scherm 0)
-(define rechts-scherm 13)
+(define rechts-scherm (* 13 px-element-breedte))
 
 
 (define pos-baan '(11 10 9 7 6 5)) ;gebruikt voor muntgenerator
@@ -40,10 +40,10 @@
 (define level 5)
 
 ;; Kikker configuratie
-(define kikker-refresh-rate 20)
+(define kikker-refresh-rate 15)
 
 ;posities die nodig zijn
-(define midden-x (- (/ elementen-per-rij 2) 1))
+(define midden-x (* (- (/ elementen-per-rij 2) 1) px-element-breedte))
 
 ;Startpositie Kikker
 (define kikker-x-startpos midden-x)
@@ -57,138 +57,151 @@
          '(0 4 9 13))
         (else '(1 12))))
 
+(define normale-auto-tag     0)
+(define vertraagde-auto-tag  1)
+(define volgende-auto-tag    2)
+
 (define (maak-adt-auto x-pos y-pos)
   (let ((auto-pos (maak-adt-positie x-pos y-pos))) ;dit zal later een assoc-lijst worden (met tag)
-    
 
-    (define (teken! teken-adt)
-      ((teken-adt 'teken-auto!) dispatch-auto))
-    (define auto-step 3)
-    (define (update! teken-adt)
+    (define (teken! teken-adt nummer)
+      ((teken-adt 'teken-auto!) dispatch-auto nummer))
+
+    (define auto-afstand            3)
+    (define vertraagde-auto-afstand 1)
+
+    (define (update! teken-adt tag kikker-adt)
       (cond ((< (auto-pos 'x) 0) ((auto-pos 'x!) x-pos)) ((auto-pos 'x!) y-pos))
-      
-          ((auto-pos 'x!) (- (auto-pos 'x) auto-step))
-            
-      
-           (teken! teken-adt))
-
-          (define (dispatch-auto msg)
-            (cond ((eq? msg 'x) (auto-pos 'x))
-                  ((eq? msg 'y) (auto-pos 'y))
-                  ((eq? msg 'update!) update!)
-                  ((eq? msg 'teken!) teken!)
-                  ((eq? msg 'volgende) volgende-positie)))
-
-          dispatch-auto))
+      (cond ((= normale-auto-tag tag)
+             ((auto-pos 'x!) (- (auto-pos 'x) auto-afstand)))
+            ((= vertraagde-auto-tag tag) (if (= (auto-pos 'y) (kikker-adt 'y))
+                                             ((auto-pos 'x!) (- (auto-pos 'x) vertraagde-auto-afstand))
+                                             ((auto-pos 'x!) (- (auto-pos 'x) auto-afstand)))) ;maak hiervan een grote conditional die delegeert
+            ((= volgende-auto-tag tag)
+             (cond ((> (kikker-adt 'y) (auto-pos 'y)) ((auto-pos 'y!) (+ (auto-pos 'y) px-element-hoogte)))
+                   ((< (kikker-adt 'y) (auto-pos 'y)) ((auto-pos 'y!) (- (auto-pos 'y) px-element-hoogte))))
+             ((auto-pos 'x!) (- (auto-pos 'x) auto-afstand))))
+      (teken! teken-adt tag))
 
 
-    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    ;;;;;;;;;;; Spel-adt ;;;;;;;;;;;;;;;;;;;
-    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-    (define (maak-adt-spel)
+    (define (dispatch-auto msg)
+      (cond ((eq? msg 'x) (auto-pos 'x))
+            ((eq? msg 'y) (auto-pos 'y))
+            ((eq? msg 'update!) update!)
+            ((eq? msg 'teken!) teken!)
+            ((eq? msg 'volgende) volgende-positie)))
 
-
-      ;objectenaanmaak
-      (define kikker-adt (maak-adt-kikker))
-      (define munt-adt (maak-adt-munt))
-      (define teken-adt (maak-adt-teken "Frogger" px-venster-hoogte px-venster-breedte))
-      (define auto-adt (maak-adt-auto 390 (* 5 px-element-hoogte) ))
-      (define auto-adt2 (maak-adt-auto 390 (* 6 px-element-hoogte) ))
-  
-
-      ;keyboard-inputprocedure
-      (define (toets-functie-tijdens-spel type toets)
-        (if (eq? type 'down)
-            (cond
-              ((eq? toets 'right)
-               ((kikker-adt 'beweging!) 'rechts))
-              ((eq? toets 'left)
-               ((kikker-adt 'beweging!) 'links))
-              ((eq? toets 'up)
-               ((kikker-adt 'beweging!) 'omhoog))
-              ((eq? toets 'down)
-               ((kikker-adt 'beweging!) 'omlaag)))))
-
-      ;Abstractie die overlap met munt en kikker berekent
-      (define (controleer-x-volgende asset-coordinaat volgende)
-        (define (rechts-pixel coordinaat)
-          (+ 1 coordinaat))
-        (define (links-pixel coordinaat)
-          (- coordinaat 1))
-        (or (and (<= asset-coordinaat volgende)
-                 (< volgende (rechts-pixel asset-coordinaat)))
-            (< (links-pixel asset-coordinaat) volgende asset-coordinaat)))
+    dispatch-auto))
 
 
-      ;overloopt coordinaten van struik en checkt overlap
-      (define (controleer-struiken kikker-volgende)
-        (define bool #f)
-        (for-each (lambda (struik-x)
-                    (if (eq? bool #f)
-                        (set! bool (controleer-x-volgende struik-x kikker-volgende))))
-                  (struik-pos level))
-        bool)
-  
-      (define (start)
-        (define kikker-tijd  0)
-        ;; Deze functie voert men elke `tick` uit.
-        (define (spel-lus-functie delta-tijd)
-          (set! kikker-tijd  (+ kikker-tijd delta-tijd))
-          ((auto-adt 'update!) teken-adt)
-          ((auto-adt2 'update!) teken-adt)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;; Spel-adt ;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-          ;Refresh kikker
-          (if (> kikker-tijd kikker-refresh-rate)
-              (begin
-                ;; Verander positie van de kikker (Collision detection)
-                (let* ((kikker-y (kikker-adt 'y))
-                       (kikker-x (kikker-adt 'x))
-                       (munt-x (munt-adt 'x))
-                       (munt-y (munt-adt 'y))
-                       (kikker-volgende-y (cdr ((kikker-adt 'volgende) kikker-x kikker-y)))
-                       (kikker-volgende-x (car ((kikker-adt 'volgende) kikker-x kikker-y))))
-
-                  (cond ((or (not (<= links-scherm kikker-volgende-x rechts-scherm))
-                             (not (<= bovenaan-scherm kikker-volgende-y onderaan-scherm)) ;Niet uit het scherm 
-                             (and (controleer-struiken kikker-volgende-x)
-                                  (= kikker-volgende-y x-pos-berm-met-struik))) ;botsing met struik
-                         ((kikker-adt 'beweging!) 'doe-niets))
-                        ((and (= munt-y kikker-volgende-y)
-                              (controleer-x-volgende munt-x kikker-volgende-x))
-                         ((munt-adt 'verwijder!) teken-adt)
-                         ;((munt-adt 'verander-plaats!) teken-adt) ;uncomment deze lijn voor randomgeneratie munt
-                         ((kikker-adt 'beweeg!))); botsing met munt
-                        (else
-                         ((kikker-adt 'beweeg!)))))
-                (set! kikker-tijd 0)))
-
-          ;;Herteken kikker
-          ((kikker-adt 'teken!) teken-adt))
-      
-      
-        ;; Zet de callbacks via de library.
-        ((teken-adt 'set-spel-lus-functie!) spel-lus-functie)
-        ((teken-adt 'set-toets-functie!) toets-functie-tijdens-spel))
-  
-      ;Teken achtergrond en munt
-      ((teken-adt 'teken-scherm!))
-      ((munt-adt 'teken!) teken-adt)
-
-      ((auto-adt 'teken!) teken-adt)
+(define (maak-adt-spel)
 
 
-      (define (dispatch-frogger msg)
-        (cond ((eq? msg 'start) start)))
-  
-      dispatch-frogger)
+  ;objectenaanmaak
+  (define kikker-adt (maak-adt-kikker))
+  (define munt-adt (maak-adt-munt))
+  (define teken-adt (maak-adt-teken "Frogger" px-venster-hoogte px-venster-breedte))
+  (define auto-adt (maak-adt-auto 390 (* 5 px-element-hoogte)))
+  (define auto-adt2 (maak-adt-auto 390 (* 6 px-element-hoogte)))
+  (define auto-adt3 (maak-adt-auto 390 (* 7 px-element-hoogte)))
 
 
-    ;;;;;;;;;;;;;;;;;
-    ;; Entry Point ;;
-    ;;;;;;;;;;;;;;;;;
+  ;keyboard-inputprocedure
+  (define (toets-functie-tijdens-spel type toets)
+    (if (eq? type 'down)
+        (cond
+          ((eq? toets 'right)
+           ((kikker-adt 'beweging!) 'rechts))
+          ((eq? toets 'left)
+           ((kikker-adt 'beweging!) 'links))
+          ((eq? toets 'up)
+           ((kikker-adt 'beweging!) 'omhoog))
+          ((eq? toets 'down)
+           ((kikker-adt 'beweging!) 'omlaag)))))
 
-    (define spel (maak-adt-spel))
+  ;Abstractie die overlap met munt en kikker berekent
+  (define (controleer-x-volgende asset-coordinaat volgende)
+    (define (rechts-pixel coordinaat)
+      (+ 1 coordinaat))
+    (define (links-pixel coordinaat)
+      (- coordinaat 1))
+    (or (and (<= asset-coordinaat volgende)
+             (< volgende (rechts-pixel asset-coordinaat)))
+        (< (links-pixel asset-coordinaat) volgende asset-coordinaat)))
 
-    ((spel 'start))
-    
+
+  ;overloopt coordinaten van struik en checkt overlap
+  (define (controleer-struiken kikker-volgende)
+    (define bool #f)
+    (for-each (lambda (struik-x)
+                (if (eq? bool #f)
+                    (set! bool (controleer-x-volgende struik-x kikker-volgende))))
+              (struik-pos level))
+    bool)
+
+  (define (start)
+    (define kikker-tijd  0)
+    ;; Deze functie voert men elke `tick` uit.
+    (define (spel-lus-functie delta-tijd)
+      (set! kikker-tijd  (+ kikker-tijd delta-tijd))
+      ((auto-adt 'update!) teken-adt 0 kikker-adt)
+      ((auto-adt2 'update!) teken-adt 1 kikker-adt)
+      ((auto-adt3 'update!) teken-adt 2 kikker-adt)
+
+      ;Refresh kikker
+      (if (> kikker-tijd kikker-refresh-rate)
+          (begin
+            ;; Verander positie van de kikker (Collision detection)
+            (let* ((kikker-y (kikker-adt 'y))
+                   (kikker-x (kikker-adt 'x))
+                   (munt-x (munt-adt 'x))
+                   (munt-y (munt-adt 'y))
+                   (kikker-volgende-y (cdr ((kikker-adt 'volgende) kikker-x kikker-y)))
+                   (kikker-volgende-x (car ((kikker-adt 'volgende) kikker-x kikker-y))))
+
+              (cond ((or (not (<= links-scherm kikker-volgende-x rechts-scherm))
+                         (not (<= bovenaan-scherm kikker-volgende-y onderaan-scherm)) ;Niet uit het scherm
+                         (and (controleer-struiken kikker-volgende-x)
+                              (= kikker-volgende-y x-pos-berm-met-struik))) ;botsing met struik
+                     ((kikker-adt 'beweging!) 'doe-niets))
+                    ((and (= munt-y kikker-volgende-y)
+                          (controleer-x-volgende munt-x kikker-volgende-x))
+                     ((munt-adt 'verwijder!) teken-adt)
+                     ;((munt-adt 'verander-plaats!) teken-adt) ;uncomment deze lijn voor randomgeneratie munt
+                     ((kikker-adt 'beweeg!))); botsing met munt
+                    (else
+                     ((kikker-adt 'beweeg!)))))
+            (set! kikker-tijd 0)))
+
+      ;;Herteken kikker
+      ((kikker-adt 'teken!) teken-adt))
+
+
+    ;; Zet de callbacks via de library.
+    ((teken-adt 'set-spel-lus-functie!) spel-lus-functie)
+    ((teken-adt 'set-toets-functie!) toets-functie-tijdens-spel))
+
+  ;Teken achtergrond en munt
+  ((teken-adt 'teken-scherm!))
+  ((munt-adt 'teken!) teken-adt)
+
+
+
+  (define (dispatch-frogger msg)
+    (cond ((eq? msg 'start) start)))
+
+  dispatch-frogger)
+
+
+;;;;;;;;;;;;;;;;;
+;; Entry Point ;;
+;;;;;;;;;;;;;;;;;
+
+(define spel (maak-adt-spel))
+
+((spel 'start))

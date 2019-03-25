@@ -1,8 +1,8 @@
 #lang racket
 
 ;;;;*----------------------------------*;;;;
-;;;;*        >>>  graphics  <<<        *;;;;
-;;;;*  >>>  Jaarproject 2018-2019 <<<  *;;;;
+;;;;*       >>> Graphics.rkt  <<<      *;;;;
+;;;;* > Programmeerproject 2018-2019 < *;;;;
 ;;;;*                                  *;;;;
 ;;;;*   Original implementation for    *;;;;
 ;;;;*     Jaarproject 2013-2014 by     *;;;;
@@ -14,14 +14,21 @@
 ;;;;*         Bjarno Oeyen and         *;;;;
 ;;;;*         Jonathan Riggio          *;;;;
 ;;;;*                                  *;;;;
-;;;;*            Versie 2              *;;;;
+;;;;*             Versie 3             *;;;;
 ;;;;*                                  *;;;;
 ;;;;*      Software Languages Lab      *;;;;
 ;;;;*----------------------------------*;;;;
 
 (require racket/gui/base)
 (require racket/string)
+
 (provide make-window make-tile make-bitmap-tile make-tile-sequence generate-mask)
+
+; In R5RS projects, include this library using
+; (#%require "Graphics.rkt")
+
+; In Racket projects, include this library using
+; (require "Graphics.rkt")
 
 ;;;;---------------------------------------------------------------------
 ;;;; Note: this code needs to be cleaned up since we mainly did all the dirty
@@ -40,17 +47,22 @@
 ;;;; changing the x-value of a tile will update the canvas.
 ;;;;---------------------------------------------------------------------
 
-(define (make-window w h title)
+(define fps-refresh-time 1000)
+
+(define (make-window w h title (target-fps 60))
   (let* ((show-fps #t)
          (fps 0)
+         (fps-accum-dt 0)
+         (fps-accum-frames 0)
          (delta-time 0)
          (previous-time (current-milliseconds))
+         (background-color #f)
+         
          ;; Define our dummy keyboard-callback
-         (keyboard-callback (lambda (type key) (display "No keyhandler assigned!\n")))
+         (keyboard-callback (lambda (type key) (void)))
          ;; Define our dummy update-callback
-         (update-callback (lambda (ev) (display "No update callback assigned!\n")))
-         (buffer-bitmap (make-object bitmap% w h))
-         (buffer-bitmap-dc (new bitmap-dc% [bitmap buffer-bitmap]))
+         (update-callback (lambda (ev) (void)))
+         
          (game-loop (lambda (deltatime events) (void)))
          (game-loop-timer #f)
          (layers '())
@@ -59,34 +71,37 @@
     ;; Define the paint-callback which is called each frame
     (define (paint-callback canvas dc)
       ;; before we do anything, the game-loop is executed.
-      (update-callback delta-time)    
-      ;; clear the buffer
-      (send buffer-bitmap-dc clear)
+      (update-callback delta-time)
+      
+      (when background-color
+        (send dc set-background background-color)
+        (set! background-color #f))
+      
+      (send dc clear) 
+
       ;; Draw all layers on each frame
-      (for-each (lambda (layer) ((layer 'draw) buffer-bitmap-dc)) layers)
-      ;; clear the provided-dc of window. 
-      (send dc clear)
-      ;; finally, draw the buffer on the screen. 
-      (send dc draw-bitmap buffer-bitmap 0 0)
+      (for-each (lambda (layer) ((layer 'draw) dc)) layers)
+
       ;; calculate frames per second. 
-      (set! fps (calculate-fps delta-time))
+      (update-fps! delta-time)
       ;; If show-fps, construct the fps string and set the fps in the frame label.
       (when show-fps
         (send frame set-label (construct-fps-string title fps))))
     
     ;; Calculate FPS from the time (ms) since last frame
-    (define (calculate-fps delta-time)
-      (if (not (= delta-time 0))
-          (quotient 1000 delta-time) 
-          fps))
+    (define (update-fps! dt)
+      (set! fps-accum-dt (+ fps-accum-dt dt))
+      (set! fps-accum-frames (+ fps-accum-frames 1))
+      (when (> fps-accum-dt fps-refresh-time)
+        (set! fps fps-accum-frames)
+        (set! fps-accum-frames 0)
+        (set! fps-accum-dt (- fps-accum-dt fps-refresh-time))))
     
     ;; Construct FPS string
     (define (construct-fps-string title fps)
-      (define fps-string (number->string (exact->inexact fps)))
-      (set! fps-string (string-append title fps-string))
-      (set! fps-string (list-ref (string-split fps-string ".") 0))
-      (set! fps-string (string-append "  FPS: " fps-string))
-      fps-string)
+      (string-append title
+                     " - fps: "
+                     (number->string fps)))
 
     (define keyboard-state (make-hasheq))
     (define (handle-keyboard new-state key)
@@ -141,14 +156,14 @@
     
     ;; Set the backgroudn color of the window
     (define (set-background! colorstring)
-      (send buffer-bitmap-dc set-background (make-object color% colorstring)))
+      (set! background-color (make-object color% colorstring)))
     ;; #############################################################    
     ;; ###### Setting up a self-sustaining game-loop ###############
     ;; #############################################################    
     ;; Here we handle how fast the canvas is refreshed and thereby how 
     ;; fast paint-callback will be called. 
     (define (launch-game-loop)
-      (let* ((max-fps 500)          ;; The maximum frames per seconds someone can get is 500.
+      (let* ((max-fps 500)          ;; The maximum frames per seconds
              (min-wait-per-frame 1) ; apparently this has to be at least 1 to avoid locking up.
              (ms-per-frame (quotient 1000 max-fps))) ; calculate the MINIMUM delta-time in ms between two frames.
         
@@ -197,8 +212,8 @@
     (send frame show #t)
     
     ;; set backgroudn and foreground. 
-    (send buffer-bitmap-dc set-background (make-object color% "black"))
-    (send buffer-bitmap-dc set-text-foreground (make-object color% "white"))
+    (set-background! "black")
+    
     ;; and finally launch the self-sustaining game-loop.
     (launch-game-loop)
     (send canvas focus)
@@ -607,9 +622,9 @@
     ;; # redraw on temporary bitmap layer.
     ;; void -> void
     (define (redraw)
-      (set! bitmap (make-object bitmap% w h #f #t))
-      (set! bitmap-dc (new bitmap-dc%  [bitmap bitmap]))
-      ;; as you can see, this will redraw all drawables on the layer
+      (send bitmap-dc erase)
+
+      ;; This will redraw all drawables on the layer
       ;; Therefore it is not wise to put one moving object together with a bunch 
       ;; of non-moving objects on ONE layer.
       (for-each (lambda (tile) ((tile 'draw) bitmap-dc)) drawables))
