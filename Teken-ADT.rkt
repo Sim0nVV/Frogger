@@ -23,17 +23,18 @@
   
   (define (teken-scherm!)
     (define (teken-struiken) 
-      (define y x-pos-berm-met-struik)
+      (define y y-pos-berm-met-struik)
       (for-each (lambda (x-pos)
                   (define struik-tile (make-bitmap-tile "Bosje.png" "Bosje_mask.png"))
                   ((struik-laag 'add-drawable) struik-tile)
-                  ((struik-tile 'set-x!) (x-venster x-pos))
-                  ((struik-tile 'set-y!) (y-venster y)))
+                  ((struik-tile 'set-x!) x-pos)
+                  ((struik-tile 'set-y!) y))
                 (struik-pos level)))
     (define (teken-achtergrond)
       (define achtergrond-tile (make-bitmap-tile "Achtergrond.png" "Achtergrond_mask.png"))
       ((achtergrond-laag 'add-drawable) achtergrond-tile)
       (teken-struiken))
+    
     (teken-achtergrond))
 
     
