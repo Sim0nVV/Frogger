@@ -1,6 +1,11 @@
+#lang racket 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;; Teken ADT ;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(require "graphics.rkt")
+(require "abstracties.rkt")
+(provide maak-adt-teken)
 
 
 (define (maak-adt-teken titel pixels-verticaal pixels-horizontaal)
@@ -120,6 +125,5 @@
           ((eq? msg 'teken-auto!) teken-auto!)
           ((eq? msg 'verwijder-munt!) verwijder-munt!) 
           ((eq? msg 'canvas-h) pixels-verticaal)
-          ((eq? msg 'teken-score!) teken-score!)
           ((eq? msg 'canvas-w) pixels-horizontaal)))
   dispatch-teken-adt)

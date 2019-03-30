@@ -1,6 +1,10 @@
+#lang racket 
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;; Positie ADT ;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(provide maak-adt-positie)
 
 (define (maak-adt-positie x y)
   (let ((x-pos x)

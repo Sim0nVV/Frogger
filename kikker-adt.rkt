@@ -1,6 +1,15 @@
+#lang racket
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;; Kikker ADT ;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(require "positie-adt.rkt")
+(require "abstracties.rkt")
+(provide maak-adt-kikker)
+
+
 
 (define (maak-adt-kikker x-pos y-pos)
   (let ((kikker-positie (maak-adt-positie x-pos

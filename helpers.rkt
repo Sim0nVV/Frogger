@@ -1,7 +1,12 @@
+#lang racket
+
+(provide
+ debug
+ any-true?)
 (define debug? #t)
 
 (define (debug x . xs)
-  (if debug?
+  (when debug?
       (begin
         (display x)
         (for-each display xs)

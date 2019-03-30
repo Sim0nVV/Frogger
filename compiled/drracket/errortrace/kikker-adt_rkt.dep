@@ -1,0 +1,1 @@
+("7.0" ("f18c7f0c8bdca696919fd19019408fa943796973" . "86c3ef3ea6ea090ec3a30cf6e805e0ca7be30e27") #"/Users/macbookpro/Documents/GitHub/Frogger/abstracties.rkt" #"/Users/macbookpro/Documents/GitHub/Frogger/positie-adt.rkt" (collects #"errortrace" #"errortrace-key.rkt") (collects #"racket" #"main.rkt") (collects #"racket" #"runtime-config.rkt"))
