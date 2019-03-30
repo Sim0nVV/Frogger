@@ -2,9 +2,9 @@
 ;;;;;;;;;;; Kikker ADT ;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define (maak-adt-kikker)
-  (let ((kikker-positie (maak-adt-positie kikker-x-startpos
-                                          kikker-y-startpos))
+(define (maak-adt-kikker x-pos y-pos)
+  (let ((kikker-positie (maak-adt-positie x-pos
+                                          y-pos))
         (beweging 'doe-niets)) ;beweging is de richting waarin de kikker zal updaten na beweeg!
 
     (define px-afgelegde-afstand 10)

@@ -10,13 +10,6 @@
   ;; Teken zwarte achtergrond
   ((venster 'set-background!) "black")
 
-  ;zet om van oude coordinatenstelsel naar nieuwe (naar 0 tot 1)
-  (define (x-venster x-c)
-    (* pixels-horizontaal (* element-breedte x-c)))
-  (define (y-venster y-c)
-    (* pixels-verticaal (* element-hoogte y-c)))
-
-
   ;; Teken Achtergrond en struiken
   (define achtergrond-laag (venster 'make-layer))
   (define struik-laag (venster 'make-layer))
@@ -34,7 +27,6 @@
       (define achtergrond-tile (make-bitmap-tile "Achtergrond.png" "Achtergrond_mask.png"))
       ((achtergrond-laag 'add-drawable) achtergrond-tile)
       (teken-struiken))
-    
     (teken-achtergrond))
 
     
@@ -42,13 +34,14 @@
   ; Configuratie Munt-layer
   (define munt-laag (venster 'make-layer))
   (define munt-tile (make-bitmap-tile "Bitcoin.png" "Bitcoin_mask.png"))
+  ((munt-laag 'add-drawable) munt-tile)
   
 
   ;Tekent en verwijder munt
+
   (define (teken-munt! munt-adt)
     (let* ((munt-x (munt-adt 'x))
            (munt-y (munt-adt 'y)))
-      ((munt-laag 'add-drawable) munt-tile)
       ((munt-tile 'set-x!) munt-x)
       ((munt-tile 'set-y!) munt-y)))
 
@@ -60,7 +53,9 @@
   (define kikker-tile (make-bitmap-tile "Frogger.png" "Frogger_mask.png"))
   ((kikker-laag 'add-drawable) kikker-tile)
 
+  ;; Configuratie Auto tile
   (define auto-laag (venster 'make-layer))
+
   (define auto-tile (make-bitmap-tile "auto1.png" "Auto1_mask.png"))
   (define auto-tile2 (make-bitmap-tile "auto1.png" "Auto1_mask.png"))
   (define auto-tile3 (make-bitmap-tile "auto2.png" "Auto2_mask.png"))
@@ -70,12 +65,23 @@
   ((auto-laag 'add-drawable) auto-tile2)
   ((auto-laag 'add-drawable) auto-tile3)
   ((auto-laag 'add-drawable) auto-tile4)
+
   
   (define auto-tile-vector (vector auto-tile auto-tile2 auto-tile3 auto-tile4))
 
 
+  ;Score ADT getekend
+  (define score-tile (make-tile 300 100))
+  
+  ((score-tile 'draw-text) "dit is een zeer mooi tekstje" 15 0 0 "Olive")
+  ((auto-laag 'add-drawable) score-tile)
+   ;TODO Maak nog een extra laag aan
+  
+  
+
+
   ;; Teken Kikker
-  (define (teken-kikker! kikker-adt)
+  (define (teken-kikker! kikker-adt) ;TODO, laat frogger draaien
     (let* ((kikker-x (kikker-adt 'x))
            (kikker-y (kikker-adt 'y)))
       ((kikker-tile 'set-x!) kikker-x)
@@ -93,6 +99,7 @@
           (y-pos (adt 'y))))) ;TODO: hoe vind je de tile bijhorend bij het adt??
       
 
+  
 
   ;; Spel lus functies
   (define (set-spel-lus-functie! fun)
@@ -113,5 +120,6 @@
           ((eq? msg 'teken-auto!) teken-auto!)
           ((eq? msg 'verwijder-munt!) verwijder-munt!) 
           ((eq? msg 'canvas-h) pixels-verticaal)
+          ((eq? msg 'teken-score!) teken-score!)
           ((eq? msg 'canvas-w) pixels-horizontaal)))
   dispatch-teken-adt)
