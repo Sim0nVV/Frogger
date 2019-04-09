@@ -1,3 +1,3 @@
 (#%require "Graphics.rkt")
 
-(generate-mask "Auto1.png" "black")
+(generate-mask "Frogger-onschendbaar.png" "white")
