@@ -15,9 +15,12 @@
   ;; Teken zwarte achtergrond
   ((venster 'set-background!) "black")
 
-  ;; Teken Achtergrond en struiken
+  ;; Teken Achtergrond en struiken (lagen zijn imperformant -> dingen die nooit zullen overlappen nooit samen)
   (define achtergrond-laag (venster 'make-layer))
   (define struik-laag (venster 'make-layer))
+  (define eetbare-objecten-laag (venster 'make-layer))
+  (define kikker-laag (venster 'make-layer))
+  (define auto-en-score-laag (venster 'make-layer))
   
   (define (teken-scherm!)
     (define (teken-struiken) 
@@ -34,15 +37,9 @@
       (teken-struiken))
     (teken-achtergrond))
 
-
-  ; Configuratie Eetbare-objecten-laag
-  (define eetbare-objecten-laag (venster 'make-layer))
-  (define munt-tile (make-bitmap-tile "Bitcoin.png" "Bitcoin_mask.png"))
-
-  (define pil-tile (make-bitmap-tile "pil.png" "pil_mask.png"))
   
-  ;Tekent en verwijder munt
 
+  ;teken en verwijder functies
   
   (define (teken-munt! munt-adt)
     ((eetbare-objecten-laag 'add-drawable) munt-tile)
@@ -52,15 +49,62 @@
     ((eetbare-objecten-laag 'remove-drawable) munt-tile))
 
 
+  (define (teken-score! score-adt score)
+    (let ((score-string (string-append "Score: " (number->string score))))
+      (score-tile 'clear)
+      ((score-tile 'draw-text) score-string 20 0 0 "Red")
+      ((auto-en-score-laag 'add-drawable) score-tile)))
+
+  ;; Teken Kikker
+  (define (teken-kikker! kikker-adt)
+    (if (kikker-adt 'onschendbaar?)
+        (hogere-orde-teken! kikker-adt kikker-onschendbaar-tile)
+        (hogere-orde-teken! kikker-adt kikker-tile)))
+
+  (define (verander-kikker-tile! kikker-adt) ;BUG; Wanneer de kikker onschendbaar is, en opnieuw de pil neemt, blijft de tile hangen.
+    (if (kikker-adt 'onschendbaar?)
+        (begin
+          ((kikker-laag 'remove-drawable) kikker-tile)
+          ((kikker-laag 'add-drawable) kikker-onschendbaar-tile))
+        (begin
+          (display "onschendbare tile wordt verwijderd")
+          ((kikker-laag 'remove-drawable) kikker-onschendbaar-tile)
+          ((kikker-laag 'add-drawable) kikker-tile))))
+
+  (define (teken-auto! auto-adt nr)
+    (hogere-orde-teken! auto-adt (vector-ref auto-tile-vector nr)))
+
+  ;  Pil
+  (define (teken-pil! pil-adt)
+    ((eetbare-objecten-laag 'add-drawable) pil-tile)
+    (hogere-orde-teken! pil-adt pil-tile))
+
+  (define (verwijder-pil!)
+    ((eetbare-objecten-laag 'remove-drawable) pil-tile))
+
+  (define insect-tile (make-bitmap-tile "insect.png" "insect_mask.png"))
+
+  (define (teken-insect! insect-adt)
+    ((eetbare-objecten-laag 'add-drawable) insect-tile)
+    (hogere-orde-teken! insect-adt insect-tile))
+
+  (define (verwijder-insect!)
+    ((eetbare-objecten-laag 'remove-drawable) insect-tile))
+
+
+  ; Configuratie Eetbare-objecten-laag
+  ;TODO: Teken van deze objecten gebeurt eenmalig (net als struik). Maakt ms een lijst met hen. 
+  (define munt-tile (make-bitmap-tile "Bitcoin.png" "Bitcoin_mask.png"))
+  (define pil-tile (make-bitmap-tile "pil.png" "pil_mask.png"))
+  
+
   
   ;; Configuratie Kikker tile
-  (define kikker-laag (venster 'make-layer))
   (define kikker-tile (make-bitmap-tile "Frogger.png" "Frogger_mask.png"))
   (define kikker-onschendbaar-tile (make-bitmap-tile "Frogger-Onschendbaar.png" "Frogger-Onschendbaar_mask.png"))
   ((kikker-laag 'add-drawable) kikker-tile)
 
   ;; Configuratie Auto tile
-  (define auto-en-score-laag (venster 'make-layer))
 
   (define auto-tile (make-bitmap-tile "auto1.png" "Auto1_mask.png"))
   (define auto-tile2 (make-bitmap-tile "auto1.png" "Auto1_mask.png"))
@@ -77,42 +121,11 @@
 
   ;Score ADT getekend
   
-  (define score-tile (make-tile 400 30)) 
-  
-  (define (teken-score! score-adt score)
-    (let ((score-string (string-append "Score: " (number->string score))))
-      (score-tile 'clear)
-      ((score-tile 'draw-text) score-string 20 0 0 "Red")
-      ((auto-en-score-laag 'add-drawable) score-tile)))
+  (define score-tile (make-tile 400 30))
 
   
-  ;; Teken Kikker
-  (define (teken-kikker! kikker-adt)
-    (if (kikker-adt 'onschendbaar?)
-        (hogere-orde-teken! kikker-adt kikker-onschendbaar-tile)
-        (hogere-orde-teken! kikker-adt kikker-tile)))
 
-  (define (verander-kikker-tile! kikker-adt)
-    (if (kikker-adt 'onschendbaar?)
-        (begin
-          ((kikker-laag 'remove-drawable) kikker-tile)
-          ((kikker-laag 'add-drawable) kikker-onschendbaar-tile))
-        (begin
-          ((kikker-laag 'remove-drawable) kikker-onschendbaar-tile)
-          ((kikker-laag 'add-drawable) kikker-tile))))
-
-  (define (teken-auto! auto-adt nr)
-    (hogere-orde-teken! auto-adt (vector-ref auto-tile-vector nr)))
-
-  ;  Pil
-  (define (teken-pil! pil-adt)
-    ((eetbare-objecten-laag 'add-drawable) pil-tile)
-    (hogere-orde-teken! pil-adt pil-tile))
-
-  (define (verwijder-pil!)
-    ((eetbare-objecten-laag 'remove-drawable) pil-tile))
-
-
+  
   ;; Spel lus functies
   (define (set-spel-lus-functie! fun)
     ((venster 'set-update-callback!) fun))
@@ -132,10 +145,12 @@
           ((eq? msg 'teken-auto!) teken-auto!)
           ((eq? msg 'teken-score!) teken-score!)
           ((eq? msg 'teken-pil!) teken-pil!)
-          ;((eq? msg 'teken-pil!) teken-pil!)
+          ((eq? msg 'teken-insect!) teken-insect!)
+          ((eq? msg 'verwijder-insect!) verwijder-insect!)
           ((eq? msg 'verwijder-munt!) verwijder-munt!)
           ((eq? msg 'verwijder-pil!) verwijder-pil!)
+          ((eq? msg 'verander-kleur-kikker!) verander-kikker-tile!)
+          
           ((eq? msg 'canvas-h) pixels-verticaal)
-          ((eq? msg 'canvas-w) pixels-horizontaal)
-          ((eq? msg 'verander-kleur-kikker!) verander-kikker-tile!)))
+          ((eq? msg 'canvas-w) pixels-horizontaal)))
   dispatch-teken-adt)

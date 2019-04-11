@@ -22,6 +22,7 @@
       ((teken-adt 'teken-munt!) dispatch-munt))
 
     (define (reset! teken-adt)
+      (set! verzameld? #f)
       ((munt-pos 'x!) (random-x))
       ((munt-pos 'y!) (random-y))
       ((teken-adt 'teken-munt!) dispatch-munt))

@@ -37,7 +37,9 @@
     (define (reset! teken-adt)
       (set-x&y! kikker-pos x-pos y-pos)
       (set! beweging 'doe-niets)
-      (verander-kleur! teken-adt))
+      
+      (when onschendbaar?
+        (verander-kleur! teken-adt)))
 
     ;tekent kikker op nieuwe positie
     (define (teken! teken-adt)
@@ -52,7 +54,7 @@
       (let* ((volgende (volgende-positie)))
         (set-x&y! kikker-pos (car volgende) (cdr volgende))
         (set-beweging! 'doe-niets)))
-
+    
     (define (verander-kleur! teken-adt)
       (set! onschendbaar? (not onschendbaar?))
       ((teken-adt 'verander-kleur-kikker!) dispatch-kikker))
@@ -67,8 +69,7 @@
             ((eq? msg 'beweeg!) beweeg!)
             ((eq? msg 'beweging) beweging)
             ((eq? msg 'reset!) reset!)
-            ((eq? msg 'verander-kleur!) verander-kleur!) 
-            ((eq? msg 'verander-onschendbaarheid) (set! onschendbaar? (not onschendbaar?)))
+            ((eq? msg 'verander-kleur!) verander-kleur!)
             ((eq? msg 'onschendbaar?) onschendbaar?)
             ((eq? msg 'volgende) volgende-positie)))
         
