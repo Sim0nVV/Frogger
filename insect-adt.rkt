@@ -16,7 +16,7 @@
     (define (verwijder! teken-adt score-adt)
       ((score-adt 'update!) 'insect teken-adt)
       (set-x&y! insect-pos (- 1) (- 1))
-      ((teken-adt 'verwijder-insect!)))
+      ((teken-adt 'verwijder-insect!) dispatch-insect))
 
     (define (teken! teken-adt)
       ((teken-adt 'teken-insect!) dispatch-insect))
@@ -24,6 +24,7 @@
     (define (reset! teken-adt)
       ((insect-pos 'x!) (random-x))
       ((insect-pos 'y!) (random-y))
+      ((teken-adt 'verwijder-insect!) dispatch-insect)
       ((teken-adt 'teken-insect!) dispatch-insect))
 
 

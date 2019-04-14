@@ -17,10 +17,11 @@
       (set! y-pos y))
     
     (define (dispatch-pos msg)
-      (cond ((eq? msg 'x!) x!)
-            ((eq? msg 'y!) y!)
-            ((eq? msg 'pos) (cons x-pos y-pos))
-            ((eq? msg 'x) x-pos)
-            ((eq? msg 'y) y-pos)))
+      (case msg
+        ('x! x!)
+        ('y! y!)
+        ('pos (cons x-pos y-pos))
+        ('x x-pos)
+        ('y y-pos)))
     
     dispatch-pos))

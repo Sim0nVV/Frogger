@@ -7,15 +7,16 @@
 
 (require "positie-adt.rkt")
 (require "abstracties.rkt")
-(provide maak-adt-kikker)
+(provide (all-defined-out))
 
-
+(define kikker-refresh-rate 25)
 
 (define (maak-adt-kikker x-pos y-pos)
   (let ((kikker-pos (maak-adt-positie x-pos
                                           y-pos))
         (beweging 'doe-niets)
-        (onschendbaar? #f)) ;beweging is de richting waarin de kikker zal updaten na beweeg!
+        (onschendbaar? #f)
+        (onschendbaarheid-tijd 0)) ;beweging is de richting waarin de kikker zal updaten na beweeg!
 
     (define px-afgelegde-afstand 10)
 
@@ -37,9 +38,8 @@
     (define (reset! teken-adt)
       (set-x&y! kikker-pos x-pos y-pos)
       (set! beweging 'doe-niets)
-      
       (when onschendbaar?
-        (verander-kleur! teken-adt)))
+        (normaal! teken-adt)))
 
     ;tekent kikker op nieuwe positie
     (define (teken! teken-adt)
@@ -55,22 +55,43 @@
         (set-x&y! kikker-pos (car volgende) (cdr volgende))
         (set-beweging! 'doe-niets)))
     
-    (define (verander-kleur! teken-adt)
-      (set! onschendbaar? (not onschendbaar?))
-      ((teken-adt 'verander-kleur-kikker!) dispatch-kikker))
+    (define (update-onschendbaarheid! delta-tijd teken-adt)
+      (set! onschendbaarheid-tijd (+ delta-tijd onschendbaarheid-tijd))
+      (when (> onschendbaarheid-tijd 5000)
+        (normaal! teken-adt)))
+
+    (define (verander-onschendbaarheid-hogere-orde teken-adt)
+        (set! onschendbaar? (not onschendbaar?))
+        (if onschendbaar? (set! kikker-refresh-rate 175)
+          (set! kikker-refresh-rate 25))
+        ((teken-adt 'verander-kleur-kikker!) dispatch-kikker))
+
+
+    (define (onschendbaar! teken-adt)
+      (when (not onschendbaar?)
+        (verander-onschendbaarheid-hogere-orde teken-adt)))
+
+    (define (normaal! teken-adt)
+      (when onschendbaar? 
+        (verander-onschendbaarheid-hogere-orde teken-adt))
+      (set! onschendbaarheid-tijd 0))
+    
 
 
     (define (dispatch-kikker msg)
-      (cond ((eq? msg 'x) (kikker-pos 'x))
-            ((eq? msg 'y) (kikker-pos 'y))
-            ((eq? msg 'pos) (kikker-pos 'pos))
-            ((eq? msg 'teken!) teken!)
-            ((eq? msg 'beweging!) set-beweging!)
-            ((eq? msg 'beweeg!) beweeg!)
-            ((eq? msg 'beweging) beweging)
-            ((eq? msg 'reset!) reset!)
-            ((eq? msg 'verander-kleur!) verander-kleur!)
-            ((eq? msg 'onschendbaar?) onschendbaar?)
-            ((eq? msg 'volgende) volgende-positie)))
+      (case msg
+        ('x (kikker-pos 'x))
+        ('y (kikker-pos 'y))
+        ('pos (kikker-pos 'pos))
+        ('teken! teken!)
+        ('beweging! set-beweging!)
+        ('beweeg! beweeg!)
+        ('beweging beweging)
+        ('reset! reset!)
+        ('onschendbaar! onschendbaar!)
+        ('normaal! normaal!)
+        ('onschendbaar? onschendbaar?)
+        ('update-onschendbaarheid! update-onschendbaarheid!)
+        ('volgende volgende-positie)))
         
     dispatch-kikker))

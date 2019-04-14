@@ -16,7 +16,7 @@
       ((score-adt 'update!) 'munt teken-adt)
       (set-x&y! munt-pos (- 1) (- 1))
       (set! verzameld? #t)
-      ((teken-adt 'verwijder-munt!)))
+      ((teken-adt 'verwijder-munt!) dispatch-munt))
 
     (define (teken! teken-adt)
       ((teken-adt 'teken-munt!) dispatch-munt))
@@ -25,6 +25,7 @@
       (set! verzameld? #f)
       ((munt-pos 'x!) (random-x))
       ((munt-pos 'y!) (random-y))
+      ((teken-adt 'verwijder-munt!) dispatch-munt)
       ((teken-adt 'teken-munt!) dispatch-munt))
 
     
@@ -36,4 +37,4 @@
         ('teken! teken!)
         ('verzameld? verzameld?)
         ('reset! reset!)))
-    dispatch-munt))
+    dispatch-munt))  
