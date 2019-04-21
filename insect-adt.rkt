@@ -11,27 +11,25 @@
 (require "abstracties.rkt")
 
 (define (maak-adt-insect x-pos y-pos)
-  (let ((insect-pos (maak-adt-positie x-pos y-pos)))
+  (let ((insect-pos (maak-adt-positie x-pos y-pos))
+        (type 'insect))
 
     (define (verwijder! teken-adt score-adt)
-      ((score-adt 'update!) 'insect teken-adt)
-      (set-x&y! insect-pos (- 1) (- 1))
-      ((teken-adt 'verwijder-insect!) dispatch-insect))
+      (verwijder-eetbaar-adt! teken-adt dispatch-insect score-adt))
 
     (define (teken! teken-adt)
-      ((teken-adt 'teken-insect!) dispatch-insect))
+      ((teken-adt 'teken-eetbaar-adt!) dispatch-insect))
 
     (define (reset! teken-adt)
-      ((insect-pos 'x!) (random-x))
-      ((insect-pos 'y!) (random-y))
-      ((teken-adt 'verwijder-insect!) dispatch-insect)
-      ((teken-adt 'teken-insect!) dispatch-insect))
+      (reset-eetbaar-adt! teken-adt dispatch-insect))
 
 
     (define (dispatch-insect msg)
       (case msg
         ('x (insect-pos 'x))
         ('y (insect-pos 'y))
+        ('type type)
+        ('pos insect-pos)
         ('verwijder! verwijder!)
         ('teken! teken!)
         ('reset! reset!)))

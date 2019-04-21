@@ -84,33 +84,26 @@
     (let ((object (assq adt lijst)))
       (if object
           (begin ((eetbare-objecten-laag 'remove-drawable) (cdr object))
-                 (remove object lijst eq?))
+                 (remq object lijst))
           lijst)))
 
   
 
-  (define (teken-pil! pil-adt)
-    (set! pil-lijst (teken-functioneel pil-adt pil-lijst
+  (define (teken-eetbaar-adt! adt)
+    (case (adt 'type)
+      ('munt (set! munt-lijst (teken-functioneel adt munt-lijst
+                                        (make-bitmap-tile "Bitcoin.png" "bitcoin_mask.png"))))
+      ('pil (set! pil-lijst (teken-functioneel adt pil-lijst
                                        (make-bitmap-tile "pil.png" "pil_mask.png"))))
+      ('insect (set! insect-lijst (teken-functioneel adt insect-lijst
+                                          (make-bitmap-tile "insect.png" "insect_mask.png"))))))
 
   
-  (define (verwijder-pil! pil-adt)
-    (set! pil-lijst (verwijder-functioneel pil-adt pil-lijst)))
-
-
-  (define (teken-munt! munt-adt)
-    (set! munt-lijst (teken-functioneel munt-adt munt-lijst
-                                        (make-bitmap-tile "Bitcoin.png" "bitcoin_mask.png"))))
-
-  (define (verwijder-munt! munt-adt)
-    (set! munt-lijst (verwijder-functioneel munt-adt munt-lijst)))
-
-  (define (teken-insect! insect-adt)
-    (set! insect-lijst (teken-functioneel insect-adt insect-lijst
-                                          (make-bitmap-tile "insect.png" "insect_mask.png"))))
-
-  (define (verwijder-insect! insect-adt)
-    (set! insect-lijst (verwijder-functioneel insect-adt insect-lijst)))
+  (define (verwijder-eetbaar-adt! adt)
+    (case (adt 'type)
+      ('munt (set! munt-lijst (verwijder-functioneel adt munt-lijst)))
+      ('pil (set! pil-lijst (verwijder-functioneel adt pil-lijst)))
+      ('insect (set! insect-lijst (verwijder-functioneel adt insect-lijst)))))
       
 
   
@@ -154,13 +147,9 @@
       ;; Teken functies.
       ('teken-kikker! teken-kikker!)
       ('teken-scherm! teken-scherm!)
-      ('teken-munt! teken-munt!)
+      ('teken-eetbaar-adt! teken-eetbaar-adt!)
       ('teken-auto! teken-auto!)
       ('teken-score! teken-score!)
-      ('teken-pil! teken-pil!)
-      ('teken-insect! teken-insect!)
-      ('verwijder-insect! verwijder-insect!)
-      ('verwijder-munt! verwijder-munt!)
-      ('verwijder-pil! verwijder-pil!)
+      ('verwijder-eetbaar-adt! verwijder-eetbaar-adt!)
       ('verander-kleur-kikker! verander-kikker-tile!)))
       dispatch-teken-adt)

@@ -14,29 +14,27 @@
 
 (define (maak-adt-pil x-pos y-pos)
   (let ((pil-pos (maak-adt-positie x-pos y-pos))
-        (verzameld? #f))
+        (verzameld? #f)
+        (type 'pil))
 
     (define (verwijder! teken-adt score-adt)
-      ((score-adt 'update!) 'pil teken-adt)
-      (set-x&y! pil-pos (- 1) (- 1))
-      (set! verzameld? #t)
-      ((teken-adt 'verwijder-pil!) dispatch-pil))
+      (verwijder-eetbaar-adt! teken-adt dispatch-pil score-adt)
+      (set! verzameld? #t))
       
     (define (teken! teken-adt)
-      ((teken-adt 'teken-pil!) dispatch-pil))
+      ((teken-adt 'teken-eetbaar-adt!) dispatch-pil))
 
     (define (reset! teken-adt)
       (set! verzameld? #f)
-      ((pil-pos 'x!) (random-x))
-      ((pil-pos 'y!) (random-y))
-      ((teken-adt 'verwijder-pil!) dispatch-pil)
-      ((teken-adt 'teken-pil!) dispatch-pil))
+      (reset-eetbaar-adt! teken-adt dispatch-pil))
 
     
     (define (dispatch-pil msg)
       (case msg
         ('x (pil-pos 'x))
         ('y (pil-pos 'y))
+        ('pos pil-pos)
+        ('type type)
         ('reset! reset!)
         ('verwijder! verwijder!)
         ('verzameld? verzameld?)

@@ -1,1 +1,1 @@
-("7.0" ("b26ec834ef06e547f64a79ed5ed50cd8fa6b615b" . "e12258dd383e1eb75cb7e342be22bbc099b7bd78") (collects #"errortrace" #"errortrace-key.rkt") (collects #"racket" #"main.rkt") (collects #"racket" #"runtime-config.rkt"))
+("7.2" racket ("5f10056fadfdde706a47d568b546f170795324ea" . "b8dbad744aa52709dc535db6cadc9c34af9b6630") #"/Users/macbookpro/Documents/VUB/Jaar 1/Programmeerproject 1/Het spel/Frogger/abstracties.rkt" (collects #"errortrace" #"errortrace-key.rkt") (collects #"racket" #"main.rkt") (collects #"racket" #"runtime-config.rkt"))

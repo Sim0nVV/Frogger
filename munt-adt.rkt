@@ -10,29 +10,27 @@
 
 (define (maak-adt-munt x-pos y-pos) 
   (let ((munt-pos (maak-adt-positie x-pos y-pos))
-        (verzameld? #f)) 
+        (verzameld? #f)
+        (type 'munt))
 
     (define (verwijder! teken-adt score-adt)
-      ((score-adt 'update!) 'munt teken-adt)
-      (set-x&y! munt-pos (- 1) (- 1))
-      (set! verzameld? #t)
-      ((teken-adt 'verwijder-munt!) dispatch-munt))
+      (verwijder-eetbaar-adt! teken-adt dispatch-munt score-adt)
+      (set! verzameld? #t))
 
     (define (teken! teken-adt)
-      ((teken-adt 'teken-munt!) dispatch-munt))
+      ((teken-adt 'teken-eetbaar-adt!) dispatch-munt))
 
     (define (reset! teken-adt)
       (set! verzameld? #f)
-      ((munt-pos 'x!) (random-x))
-      ((munt-pos 'y!) (random-y))
-      ((teken-adt 'verwijder-munt!) dispatch-munt)
-      ((teken-adt 'teken-munt!) dispatch-munt))
+      (reset-eetbaar-adt! teken-adt dispatch-munt))
 
     
     (define (dispatch-munt msg)
       (case msg
         ('x (munt-pos 'x))
         ('y (munt-pos 'y))
+        ('pos munt-pos)
+        ('type type)
         ('verwijder! verwijder!)
         ('teken! teken!)
         ('verzameld? verzameld?)

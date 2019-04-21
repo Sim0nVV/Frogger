@@ -17,8 +17,8 @@
     (define (teken! teken-adt)
       ((teken-adt 'teken-score!) dispatch-score))
 
-    (define (update-score! msg teken-adt)
-      (case msg
+    (define (update-score! teken-adt type)
+      (case type
         ('munt (set! score (+ score 100)))
         ('insect (set! score (+ score 75)))
         ('pil (set! score (+ score 50))))

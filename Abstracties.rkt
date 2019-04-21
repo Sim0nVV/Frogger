@@ -56,6 +56,25 @@
              (else '(1 12)))))
 
 
+;; Eetbaren-objecten ;;
+;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;; hogere orde ;;
+(define (reset-eetbaar-adt! teken-adt dispatch)
+  (let ((positie-adt (dispatch 'pos)))
+    (set-x&y! positie-adt (random-x) (random-y))
+    ((teken-adt 'verwijder-eetbaar-adt!) dispatch)
+    ((teken-adt 'teken-eetbaar-adt!) dispatch)))
+
+(define (verwijder-eetbaar-adt! teken-adt adt score-adt)
+  ((score-adt 'update!) teken-adt (adt 'type))
+  (set-x&y! (adt 'pos) (- 1) (- 1))
+  ((teken-adt 'verwijder-eetbaar-adt!) adt))
+  
+  
+
+
 ;Munt ADT
 (define (random-x)
   (* (random 14) px-element-breedte))

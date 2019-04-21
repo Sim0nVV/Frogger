@@ -31,9 +31,9 @@
   (define coordinaat-lijst '(5 6 10 9))
   (define type-lijst '(0 1 2 3))
   (define auto-lijst (map (lambda (x y) (maak-adt-auto 390 (* x px-element-hoogte)
-                                              y))
-                        coordinaat-lijst
-                        type-lijst))
+                                                       y))
+                          coordinaat-lijst
+                          type-lijst))
 
   
 
@@ -44,11 +44,12 @@
     (build-list 3 (lambda (x) (maak-adt-munt (random-x) (random-y)))))
 
 
-  ((teken-adt 'teken-scherm!))
-  ((score-adt 'teken!) teken-adt)
-  ((pil-adt 'teken!) teken-adt)
-  (for-each (lambda (insect-adt) ((insect-adt 'teken!) teken-adt)) insect-lijst)
-  (for-each (lambda (munt-adt) ((munt-adt 'teken!) teken-adt)) munt-lijst)
+  (define (init-teken!)
+    ((teken-adt 'teken-scherm!))
+    ((score-adt 'teken!) teken-adt)
+    ((pil-adt 'teken!) teken-adt)
+    (for-each (lambda (insect-adt) ((insect-adt 'teken!) teken-adt)) insect-lijst)
+    (for-each (lambda (munt-adt) ((munt-adt 'teken!) teken-adt)) munt-lijst))
 
   
   (define (reset!)
@@ -92,99 +93,106 @@
   
 
 
-    (define update-autos 0)
+  (define update-autos 0)
   
-    (define (start)
-      (define kikker-tijd  0)
-      (define auto-tijd    0)
-      ;; Deze functie voert men elke `tick` uit.
-      (define (spel-lus-functie delta-tijd)
+  (define (start)
+    (define kikker-tijd  0)
+    (define auto-tijd    0)
+    ;; Deze functie voert men elke `tick` uit.
+    (define (spel-lus-functie delta-tijd)
         
-        (set! kikker-tijd  (+ kikker-tijd delta-tijd))
-        (set! auto-tijd    (+ auto-tijd delta-tijd))
+      (set! kikker-tijd  (+ kikker-tijd delta-tijd))
+      (set! auto-tijd    (+ auto-tijd delta-tijd))
         
 
-        ;; Refresh Auto ;;
-        (when (> auto-tijd auto-refresh-rate) 
-          (for-each (lambda (auto-adt) ((auto-adt 'update!) teken-adt kikker-adt)) auto-lijst)
+      ;; Refresh Auto ;;
+      (when (> auto-tijd auto-refresh-rate) 
+        (for-each (lambda (auto-adt) ((auto-adt 'update!) teken-adt kikker-adt)) auto-lijst)
           
-          (let* ((auto-adt auto-lijst)
-                 (volgende-auto (list-ref auto-adt volgende-auto-type))
-                 (rare-auto (list-ref auto-adt rare-auto-type)))
+        (let* ((auto-adt auto-lijst)
+               (volgende-auto (list-ref auto-adt volgende-auto-type))
+               (rare-auto (list-ref auto-adt rare-auto-type)))
         
-            (when (and (controleer-x-volgende (rare-auto 'x) (volgende-auto 'x)) 
-                       (= (volgende-auto 'y) (rare-auto 'y)))
-              ((volgende-auto 'botsing) (rare-auto 'y) teken-adt)))
+          (when (and (controleer-x-volgende (rare-auto 'x) (volgende-auto 'x)) 
+                     (= (volgende-auto 'y) (rare-auto 'y)))
+            ((volgende-auto 'botsing) (rare-auto 'y) teken-adt)))
 
-          (set! auto-tijd 0))
+        (set! auto-tijd 0))
 
           
 
 
-        (when (kikker-adt 'onschendbaar?) ; check voor kikker onschendbaarheid
-            ((kikker-adt 'update-onschendbaarheid!) delta-tijd teken-adt))
-        ;; Refresh kikker ;;
+      (when (kikker-adt 'onschendbaar?) ; check voor kikker onschendbaarheid
+        ((kikker-adt 'update-onschendbaarheid!) delta-tijd teken-adt))
+      ;; Refresh kikker ;;
         
-        (when (> kikker-tijd kikker-refresh-rate)
+      (when (> kikker-tijd kikker-refresh-rate)
 
           
           
           
-          ;; Verander positie van de kikker (Collision detection)
-          (let* ((kikker-x (kikker-adt 'x)) 
-                 (kikker-y (kikker-adt 'y))
-                 (pil-x (pil-adt 'x))
-                 (pil-y (pil-adt 'y))
-                 (kikker-volgende-x (car ((kikker-adt 'volgende))))
-                 (kikker-volgende-y (cdr ((kikker-adt 'volgende))))
-                 (munt-pos-assoc-lijst (map (lambda (munt-adt) (cons (and (controleer-x-volgende (munt-adt 'x) kikker-volgende-x)
-                                                                          (eq? kikker-volgende-y (munt-adt 'y))) munt-adt))
-                                            munt-lijst))
-                 (insect-pos-assoc-lijst (map (lambda (insect-adt) (cons (and (controleer-x-volgende (insect-adt 'x) kikker-volgende-x)
-                                                                              (eq? kikker-volgende-y (insect-adt 'y))) insect-adt))
-                                              insect-lijst)))
+        ;; Verander positie van de kikker (Collision detection)
+        (let* ((kikker-x (kikker-adt 'x)) 
+               (kikker-y (kikker-adt 'y))
+               (pil-x (pil-adt 'x))
+               (pil-y (pil-adt 'y))
+               (kikker-volgende-x (car ((kikker-adt 'volgende))))
+               (kikker-volgende-y (cdr ((kikker-adt 'volgende))))
+               (munt-pos-assoc-lijst (map (lambda (munt-adt) (cons (and (controleer-x-volgende (munt-adt 'x) kikker-volgende-x)
+                                                                        (eq? kikker-volgende-y (munt-adt 'y))) munt-adt))
+                                          munt-lijst))
+               (insect-pos-assoc-lijst (map (lambda (insect-adt) (cons (and (controleer-x-volgende (insect-adt 'x) kikker-volgende-x)
+                                                                            (eq? kikker-volgende-y (insect-adt 'y))) insect-adt))
+                                            insect-lijst)))
 
-            (cond
-              ((and (collision-auto? kikker-adt auto-lijst teken-adt)
-                    (not (kikker-adt 'onschendbaar?)))
-               (not (kikker-adt 'onschendbaar?))
-               (reset!))
+          (cond
+            ((and (collision-auto? kikker-adt auto-lijst teken-adt)
+                  (not (kikker-adt 'onschendbaar?)))
+             (not (kikker-adt 'onschendbaar?))
+             (reset!))
              
-              ((and (< kikker-volgende-y bovenaan-scherm)
-                    (andmap (lambda (munt-adt) (munt-adt 'verzameld?)) munt-lijst)
-                    (pil-adt 'verzameld?))
-               (reset!))
+            ((and (< kikker-volgende-y bovenaan-scherm)
+                  (andmap (lambda (munt-adt) (munt-adt 'verzameld?)) munt-lijst)
+                  (pil-adt 'verzameld?))
+             (reset!))
              
-              ((or (not (<= links-scherm kikker-volgende-x rechts-scherm))
-                   (not (<= bovenaan-scherm kikker-volgende-y onderaan-scherm)) ;Niet uit het scherm
-                   (and (controleer-lijst kikker-volgende-x (struik-pos level))
-                        (= kikker-volgende-y y-pos-berm-met-struik)));botsing met struik
-               ((kikker-adt 'beweging!) 'doe-niets))
+            ((or (not (<= links-scherm kikker-volgende-x rechts-scherm))
+                 (not (<= bovenaan-scherm kikker-volgende-y onderaan-scherm)) ;Niet uit het scherm
+                 (and (controleer-lijst kikker-volgende-x (struik-pos level))
+                      (= kikker-volgende-y y-pos-berm-met-struik)));botsing met struik
+             ((kikker-adt 'beweging!) 'doe-niets))
 
              
-              ((assq #t munt-pos-assoc-lijst)
-               (let ((gegeten-munt-adt (cdr (assq #t munt-pos-assoc-lijst))))
-                 ((gegeten-munt-adt 'verwijder!) teken-adt score-adt)
-                 ((kikker-adt 'beweeg!)))); botsing met munt
-             
-              ((and (= pil-y kikker-volgende-y) ; zet dat in een lijst 
-                    (controleer-x-volgende pil-x kikker-volgende-x))
-
-               ((kikker-adt 'onschendbaar!) teken-adt)
-               ((pil-adt 'verwijder!) teken-adt score-adt)
-               ((kikker-adt 'beweeg!)))
-              ((assq #t insect-pos-assoc-lijst)
-               (let ((gegeten-insect-adt (cdr (assq #t insect-pos-assoc-lijst))))
-                 ((gegeten-insect-adt 'verwijder!) teken-adt score-adt)
-                 ((kikker-adt 'beweeg!))))
-              (else
+            ((assq #t munt-pos-assoc-lijst)
+             (let ((gegeten-munt-adt (cdr (assq #t munt-pos-assoc-lijst))))
+               ((gegeten-munt-adt 'verwijder!) teken-adt score-adt)
+               ((kikker-adt 'beweeg!)))); botsing met munt
+            ((assq #t insect-pos-assoc-lijst)
+             (let ((gegeten-insect-adt (cdr (assq #t insect-pos-assoc-lijst))))
+               ((gegeten-insect-adt 'verwijder!) teken-adt score-adt)
                ((kikker-adt 'beweeg!))))
-            
-            (set! kikker-tijd 0)))
+             
+            ((and (= pil-y kikker-volgende-y) ; zet dat in een lijst 
+                  (controleer-x-volgende pil-x kikker-volgende-x))
 
-        ;;Herteken kikker
+             ((kikker-adt 'onschendbaar!) teken-adt)
+             ((pil-adt 'verwijder!) teken-adt score-adt)
+             ((kikker-adt 'beweeg!)))
+            
+            (else
+             ((kikker-adt 'beweeg!))))
+            
+          (set! kikker-tijd 0)))
+
+      ;;Herteken kikker
         
-        ((kikker-adt 'teken!) teken-adt))
+      ((kikker-adt 'teken!) teken-adt))
+
+    ;;; INIT ;;;
+
+    (define (init)
+      (init-teken!))
+    (init)
 
 
     ;; Zet de callbacks via de library.
