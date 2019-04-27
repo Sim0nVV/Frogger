@@ -62,7 +62,7 @@
 
     (define (verander-onschendbaarheid-hogere-orde teken-adt)
         (set! onschendbaar? (not onschendbaar?))
-        (if onschendbaar? (set! kikker-refresh-rate 175)
+        (if onschendbaar? (set! kikker-refresh-rate 140)
           (set! kikker-refresh-rate 25))
         ((teken-adt 'verander-kleur-kikker!) dispatch-kikker))
 

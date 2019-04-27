@@ -30,6 +30,7 @@
 
 
 (define pos-baan '(11 10 9 7 6 5)) ;gebruikt voor muntgenerator
+(define pos-rivier (map (lambda (rij-nummer) (* rij-nummer px-element-hoogte))  '(1 2 3)))
 (define onderste-rijstroken (map (lambda (rij-nummer) (* rij-nummer px-element-hoogte)) '(9 10 11)))
 (define y-pos-berm-met-struik (* 8 px-element-hoogte)) ;Abstractie voor x-positie struiken
 

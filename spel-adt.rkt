@@ -127,9 +127,6 @@
       ;; Refresh kikker ;;
         
       (when (> kikker-tijd kikker-refresh-rate)
-
-          
-          
           
         ;; Verander positie van de kikker (Collision detection)
         (let* ((kikker-x (kikker-adt 'x)) 
@@ -164,11 +161,15 @@
 
              
             ((assq #t munt-pos-assoc-lijst)
+             
              (let ((gegeten-munt-adt (cdr (assq #t munt-pos-assoc-lijst))))
+               
                ((gegeten-munt-adt 'verwijder!) teken-adt score-adt)
                ((kikker-adt 'beweeg!)))); botsing met munt
             ((assq #t insect-pos-assoc-lijst)
+             
              (let ((gegeten-insect-adt (cdr (assq #t insect-pos-assoc-lijst))))
+               
                ((gegeten-insect-adt 'verwijder!) teken-adt score-adt)
                ((kikker-adt 'beweeg!))))
              
@@ -178,6 +179,13 @@
              ((kikker-adt 'onschendbaar!) teken-adt)
              ((pil-adt 'verwijder!) teken-adt score-adt)
              ((kikker-adt 'beweeg!)))
+
+            
+            #;((assq (kikker-adt 'y) ;prototype van rij-strook collision detection
+                   pos-rivier)
+             ((let ((huidige-rijstrook (assq (kikker-adt 'y) pos-rivier))))))
+                
+                
             
             (else
              ((kikker-adt 'beweeg!))))

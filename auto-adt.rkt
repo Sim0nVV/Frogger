@@ -54,6 +54,9 @@
     (define (reset!)
       (set-x&y! auto-pos x-pos y-pos))
 
+    ;maak een init die de auto in de correcte rijstrook zet
+    
+
 
 
     (define (dispatch-auto msg)
