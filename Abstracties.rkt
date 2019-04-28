@@ -18,21 +18,38 @@
 (define px-element-breedte 30)
 
 
+
+(define (convert-naar-higher lijst bewerking)
+  (if (not (list? lijst))
+      (bewerking lijst px-element-hoogte)
+      (map (lambda (x) (bewerking px-element-hoogte x)) lijst)))
+
+
+(define (convert-naar-pixels lijst)
+  (convert-naar-higher lijst *))
+
+(define (convert-naar-coord lijst)
+  (convert-naar-higher lijst quotient))
+
+
+
 ;Aantal cellen per venster
 (define elementen-per-rij (/ px-venster-breedte px-element-breedte))
 (define elementen-per-kolom (/ px-venster-hoogte px-element-hoogte))
 
 ;Grenzen scherm (voor collision detection)
 (define bovenaan-scherm 0)
-(define onderaan-scherm (* 12 px-element-hoogte))
+(define onderaan-scherm (convert-naar-pixels 12))
 (define links-scherm 0)
-(define rechts-scherm (* 13 px-element-breedte))
+(define rechts-scherm (convert-naar-pixels 13))
+
+
 
 
 (define pos-baan '(11 10 9 7 6 5)) ;gebruikt voor muntgenerator
-(define pos-rivier (map (lambda (rij-nummer) (* rij-nummer px-element-hoogte))  '(1 2 3)))
-(define onderste-rijstroken (map (lambda (rij-nummer) (* rij-nummer px-element-hoogte)) '(9 10 11)))
-(define y-pos-berm-met-struik (* 8 px-element-hoogte)) ;Abstractie voor x-positie struiken
+(define pos-rivier  '(1 2 3))
+(define onderste-rijstroken (convert-naar-pixels '(9 10 11)))
+(define y-pos-berm-met-struik (convert-naar-pixels 8)) ;Abstractie voor x-positie struiken
 
 (define level 5)
 
@@ -41,7 +58,7 @@
 (define auto-refresh-rate 30)
 
 ;posities die nodig zijn
-(define midden-x (* (- (/ elementen-per-rij 2) 1) px-element-breedte))
+(define midden-x (convert-naar-pixels (- (/ elementen-per-rij 2) 1)))
 
 ;Startpositie Kikker
 (define kikker-x-startpos midden-x)
@@ -51,7 +68,7 @@
 
 ; Procedure die posities struiken berekent adhv level
 (define (struik-pos level)
-  (map (lambda (x) (* px-element-hoogte x))
+  (convert-naar-pixels
        (cond ((> level 5)
               '(0 4 9 13))
              (else '(1 12)))))
@@ -78,9 +95,9 @@
 
 ;Munt ADT
 (define (random-x)
-  (* (random 14) px-element-breedte))
+  (convert-naar-pixels (random 14)))
 (define (random-y) ;random uit lijst pos-baan gekozen
-  (* (list-ref pos-baan (random 6)) px-element-hoogte))
+  (convert-naar-pixels (list-ref pos-baan (random 6))))
 
 
 
@@ -95,11 +112,10 @@
     ((tile 'set-y!) y-pos)))
 
 
-;Abstractie die overlap met munt en kikker berekent
-(define (controleer-x-volgende object-coordinaat volgende-kikker)
+;Abstractie die overlap met munt en kikker berekent ;OPKUISEN!!!
+(define (controleer-x-volgende volgende-kikker object-coordinaat)
   (define (rechtergrens coordinaat)
     (+ px-element-breedte coordinaat))
-  
   (define (linkergrens coordinaat)
     (- coordinaat px-element-breedte))
   (< (linkergrens object-coordinaat)
@@ -108,10 +124,23 @@
 
 
 ;overloopt coordinaten van struik en checkt overlap
+
+
+(define (controleer-volledig-vakje kikker-x object-coordinaat) ;
+  (define (rechtergrens coordinaat)
+    (+ px-element-breedte coordinaat))
+  (<= object-coordinaat
+   kikker-x
+   (rechtergrens object-coordinaat)))
+
+(define (hogere-orde-or-map proc kikker-x lijst)
+  (ormap (lambda (x) (proc kikker-x x)) lijst))
+
 (define (controleer-lijst kikker-x-coordinaat lijst)
-  (ormap (lambda (x)
-           (controleer-x-volgende x kikker-x-coordinaat))
-            lijst))
+ (hogere-orde-or-map controleer-x-volgende kikker-x-coordinaat lijst))
+
+(define (collision-detection-lijst-boom kikker-x-coordinaat lijst)
+  (hogere-orde-or-map controleer-volledig-vakje kikker-x-coordinaat lijst))
 
 (define (set-x&y! adt new-x new-y)
   ((adt 'x!) new-x)
@@ -131,12 +160,4 @@
 
 (define (random-range)
   (random 20 60))
-
-
-
-
-
-
-
-
 

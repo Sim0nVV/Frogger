@@ -1,3 +1,3 @@
 (#%require "Graphics.rkt")
 
-(generate-mask "auto4.png" "black")
+(generate-mask "achtergrond.png" "black")

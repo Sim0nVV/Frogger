@@ -11,6 +11,7 @@
 (require "score-adt.rkt")
 (require "insect-adt.rkt")
 (require "helpers.rkt")
+(require "rijstrook-adt.rkt")
 
  
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -35,13 +36,30 @@
                           coordinaat-lijst
                           type-lijst))
 
+  (define rijstrook-adt (maak-adt-rijstrook))
   
-
   (define insect-lijst
     (build-list 3 (lambda (x) (maak-adt-insect (random-x) (random-y)))))
 
   (define munt-lijst
     (build-list 3 (lambda (x) (maak-adt-munt (random-x) (random-y)))))
+
+  ;TODO: maak een for-each die alle objecten overloopt
+
+  (define (init-teken-op-rijstrook)
+    ((rijstrook-adt 'voeg-toe!) pil-adt)
+    ((rijstrook-adt 'voeg-toe!) kikker-adt)
+    (for-each (lambda (auto-adt) ((rijstrook-adt 'voeg-toe!) auto-adt)) auto-lijst)
+    (for-each (lambda (insect-adt) ((rijstrook-adt 'voeg-toe!) insect-adt)) insect-lijst)
+    (for-each (lambda (munt-adt) ((rijstrook-adt 'voeg-toe!) munt-adt)) munt-lijst)
+    (rijstrook-adt 'display))
+
+  (init-teken-op-rijstrook)
+
+  
+
+  
+
 
 
   (define (init-teken!)
@@ -119,11 +137,28 @@
 
         (set! auto-tijd 0))
 
+      (define (collision-detection-boom kikker-adt rijstrook-adt)
+        (if (collision-detection-lijst-boom (kikker-adt 'x)
+                          ((rijstrook-adt 'vind-rijstrook)
+                           (convert-naar-coord (kikker-adt 'y))))
+            (kikker-adt 'beweeg!)
+            (reset!)))
+      #;(define (collision-detection-struik kikker-adt rijstrook-adt)
+        (displayln (kikker-adt 'x))
+        (displayln ((rijstrook-adt 'vind-rijstrook)
+                           (convert-naar-coord (kikker-adt 'y))))
+        (if (controleer-lijst (kikker-adt 'x)
+                          ((rijstrook-adt 'vind-rijstrook)
+                           (convert-naar-coord (kikker-adt 'y))))
+            ((kikker-adt 'beweging!) 'doe-niets)
+            (kikker-adt 'beweeg!)))
+
           
 
 
-      (when (kikker-adt 'onschendbaar?) ; check voor kikker onschendbaarheid
+      (when (kikker-adt 'onschendbaar?) ; check voor kikker-onschendbaarheid
         ((kikker-adt 'update-onschendbaarheid!) delta-tijd teken-adt))
+      
       ;; Refresh kikker ;;
         
       (when (> kikker-tijd kikker-refresh-rate)
@@ -154,41 +189,38 @@
              (reset!))
              
             ((or (not (<= links-scherm kikker-volgende-x rechts-scherm))
-                 (not (<= bovenaan-scherm kikker-volgende-y onderaan-scherm)) ;Niet uit het scherm
-                 (and (controleer-lijst kikker-volgende-x (struik-pos level))
-                      (= kikker-volgende-y y-pos-berm-met-struik)));botsing met struik
+                 (not (<= bovenaan-scherm kikker-volgende-y onderaan-scherm))
+                 (and (= kikker-volgende-y y-pos-berm-met-struik)
+                      (controleer-lijst kikker-volgende-x (struik-pos level))));botsing met struik
              ((kikker-adt 'beweging!) 'doe-niets))
-
              
             ((assq #t munt-pos-assoc-lijst)
              
              (let ((gegeten-munt-adt (cdr (assq #t munt-pos-assoc-lijst))))
                
                ((gegeten-munt-adt 'verwijder!) teken-adt score-adt)
-               ((kikker-adt 'beweeg!)))); botsing met munt
+               (kikker-adt 'beweeg!))); botsing met munt
+            
             ((assq #t insect-pos-assoc-lijst)
              
              (let ((gegeten-insect-adt (cdr (assq #t insect-pos-assoc-lijst))))
                
                ((gegeten-insect-adt 'verwijder!) teken-adt score-adt)
-               ((kikker-adt 'beweeg!))))
+               (kikker-adt 'beweeg!)))
              
             ((and (= pil-y kikker-volgende-y) ; zet dat in een lijst 
                   (controleer-x-volgende pil-x kikker-volgende-x))
 
              ((kikker-adt 'onschendbaar!) teken-adt)
              ((pil-adt 'verwijder!) teken-adt score-adt)
-             ((kikker-adt 'beweeg!)))
+             (kikker-adt 'beweeg!))
 
-            
-            #;((assq (kikker-adt 'y) ;prototype van rij-strook collision detection
-                   pos-rivier)
-             ((let ((huidige-rijstrook (assq (kikker-adt 'y) pos-rivier))))))
-                
-                
+            ((member (kikker-adt 'y)
+                     (convert-naar-pixels pos-rivier))
+             (collision-detection-boom kikker-adt rijstrook-adt))
             
             (else
-             ((kikker-adt 'beweeg!))))
+             (kikker-adt 'beweeg!)))
             
           (set! kikker-tijd 0)))
 

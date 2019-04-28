@@ -85,7 +85,7 @@
         ('pos (kikker-pos 'pos))
         ('teken! teken!)
         ('beweging! set-beweging!)
-        ('beweeg! beweeg!)
+        ('beweeg! (beweeg!))
         ('beweging beweging)
         ('reset! reset!)
         ('onschendbaar! onschendbaar!)
