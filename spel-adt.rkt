@@ -69,9 +69,13 @@
     (for-each (lambda (insect-adt) ((insect-adt 'teken!) teken-adt)) insect-lijst)
     (for-each (lambda (munt-adt) ((munt-adt 'teken!) teken-adt)) munt-lijst))
 
-  
+  (define (next-level!)
+    ((score-adt 'next-level!) teken-adt)
+    (reset!))
+
   (define (reset!)
 
+    
     ((kikker-adt 'reset!) teken-adt)
     (for-each (lambda (auto-adt) (auto-adt 'reset!)) auto-lijst)
     ((score-adt 'reset!) teken-adt)
@@ -143,6 +147,7 @@
                            (convert-naar-coord (kikker-adt 'y))))
             (kikker-adt 'beweeg!)
             (reset!)))
+      
       #;(define (collision-detection-struik kikker-adt rijstrook-adt)
         (displayln (kikker-adt 'x))
         (displayln ((rijstrook-adt 'vind-rijstrook)
@@ -186,7 +191,7 @@
             ((and (< kikker-volgende-y bovenaan-scherm)
                   (andmap (lambda (munt-adt) (munt-adt 'verzameld?)) munt-lijst)
                   (pil-adt 'verzameld?))
-             (reset!))
+             (next-level!))
              
             ((or (not (<= links-scherm kikker-volgende-x rechts-scherm))
                  (not (<= bovenaan-scherm kikker-volgende-y onderaan-scherm))

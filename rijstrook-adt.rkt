@@ -9,7 +9,10 @@
 ; 2) geef object of positie terug
 ; 3) reset het spel/level indien nodig. Stap 4 indien toepasselijk.
 ; 4) als object -> 'collision met kikker en 'collision met object (veroorzaakt door kikker).
-; 5) reset. 
+; 5) reset.
+
+
+;probleem: hoe verander je de rijstrook van voorwerpen?
 
 (provide (all-defined-out))
 

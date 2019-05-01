@@ -41,9 +41,11 @@
 
 
   (define (teken-score! score-adt)
-    (let ((score-string (string-append "Score: " (number->string (score-adt 'score)))))
+    (let ((score-string (string-append "Score: " (number->string (score-adt 'score))))
+          (highscore-string (string-append "HS: " (number->string (score-adt 'highscore)))))
       (score-tile 'clear)
       ((score-tile 'draw-text) score-string 20 0 0 "Red")
+      ((score-tile 'draw-text) highscore-string 20 300 0 "Red")
       ((auto-en-score-laag 'add-drawable) score-tile)))
 
   ;; Teken Kikker
@@ -106,15 +108,12 @@
       ('insect (set! insect-lijst (verwijder-functioneel adt insect-lijst)))))
       
 
-  
   ;; Configuratie Kikker tile
   (define kikker-tile (make-bitmap-tile "Frogger.png" "Frogger_mask.png"))
   (define kikker-onschendbaar-tile (make-bitmap-tile "Frogger-Onschendbaar.png" "Frogger-Onschendbaar_mask.png"))
   ((kikker-laag 'add-drawable) kikker-tile)
 
-  ;; Configuratie Auto tile
-
-  
+  ;; Configuratie Auto tile  
 
   (define auto-lijst
     (list 
@@ -129,7 +128,7 @@
 
   ;Score ADT getekend
   
-  (define score-tile (make-tile 400 30))
+  (define score-tile (make-tile 420 30))
   
   ;; Spel lus functies
   (define (set-spel-lus-functie! fun)
