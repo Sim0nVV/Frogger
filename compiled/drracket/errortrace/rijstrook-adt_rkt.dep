@@ -1,1 +1,0 @@
-("7.2" racket ("e8224d6fc2a9418a377a8f9dbccf5c1174fa88d2" . "183c462f87675857f3b6eff8575e96eed112dd8b") #"/Users/macbookpro/Documents/VUB/Jaar 1/Programmeerproject 1/Het spel/Frogger/abstracties.rkt" (collects #"errortrace" #"errortrace-key.rkt") (collects #"racket" #"main.rkt") (collects #"racket" #"runtime-config.rkt"))
